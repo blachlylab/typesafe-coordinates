@@ -6,6 +6,8 @@ pub struct Closed {}
 
 pub trait End {
     const IS_EXCLUSIVE: bool;
+
+    // https://stackoverflow.com/questions/53304428/why-do-i-get-the-error-expected-type-parameter-found-integral-variable
     fn one() -> Self;
 }
 
