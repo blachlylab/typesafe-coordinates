@@ -17,8 +17,8 @@ type OBC = Coordinates<OneBased, Closed>;
 impl<Bs: Basis, Ed: End> Coordinates<Bs,Ed>{
     pub fn new() -> Self {
         Coordinates{
-            bkind: Bs::one(),
-            ekind: Ed::one(),
+            bkind: Bs::new(),
+            ekind: Ed::new(),
             start: Coordinate::<Bs>::new(),
             end: Coordinate::<Bs>::new(),
         }
@@ -26,8 +26,8 @@ impl<Bs: Basis, Ed: End> Coordinates<Bs,Ed>{
 
     pub fn from_int(start: i64, end: i64) -> Self {
         Coordinates{
-            bkind: Bs::one(),
-            ekind: Ed::one(),
+            bkind: Bs::new(),
+            ekind: Ed::new(),
             start: Coordinate::<Bs>::from_int(start),
             end: Coordinate::<Bs>::from_int(end),
         }

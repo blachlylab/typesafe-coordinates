@@ -11,14 +11,14 @@ type OB = Coordinate<OneBased>;
 impl<Bs: Basis> Coordinate<Bs>{
     pub fn new() -> Self {
         Coordinate{
-            kind: Bs::one(),
+            kind: Bs::new(),
             pos: -1
         }
     }
 
     pub fn from_int(pos: i64) -> Self {
         Coordinate{
-            kind: Bs::one(),
+            kind: Bs::new(),
             pos: pos
         }
     }
