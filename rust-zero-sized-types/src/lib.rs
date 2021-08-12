@@ -29,7 +29,7 @@ mod tests {
     }
 
     #[test]
-    fn test_coordinate_pair_conversions() {
+    fn test_interval_conversions() {
         let c0 = Interval::<ZeroBased, HalfOpen>::from_int(1, 3);
         let c1 = Interval::<ZeroBased, Closed>::from_int(1, 2);
         let c2 = Interval::<OneBased, HalfOpen>::from_int(2, 4);
@@ -42,7 +42,7 @@ mod tests {
     }
 
     #[test]
-    fn test_coordinate_pair_shortform_conversions() {
+    fn test_interval_shortform_conversions() {
         let c0 = ZBHO::from_int(1, 3);
         let c1 = ZBC::from_int(1, 2);
         let c2 = OBHO::from_int(2, 4);
