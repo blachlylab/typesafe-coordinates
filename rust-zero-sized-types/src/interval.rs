@@ -3,7 +3,6 @@ use crate::basis::*;
 use crate::end::*;
 
 pub struct Interval<Bs: Basis, Ed: End>{
-    bkind : Bs,
     ekind : Ed,
     start : Coordinate<Bs>,
     end : Coordinate<Bs>
@@ -17,7 +16,6 @@ pub type OBC = Interval<OneBased, Closed>;
 impl<Bs: Basis, Ed: End> Interval<Bs,Ed>{
     pub fn new() -> Self {
         Interval{
-            bkind: Bs::new(),
             ekind: Ed::new(),
             start: Coordinate::<Bs>::new(),
             end: Coordinate::<Bs>::new(),
@@ -26,7 +24,6 @@ impl<Bs: Basis, Ed: End> Interval<Bs,Ed>{
 
     pub fn from_int(start: i64, end: i64) -> Self {
         Interval{
-            bkind: Bs::new(),
             ekind: Ed::new(),
             start: Coordinate::<Bs>::from_int(start),
             end: Coordinate::<Bs>::from_int(end),
