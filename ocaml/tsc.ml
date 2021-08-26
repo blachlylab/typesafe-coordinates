@@ -21,6 +21,7 @@ type cl (** closed *)
 
 type 'a coordinate = {x: int}
 type ('a, 'b) interval = {x: int; y: int}
+(** Unable to implement type constructor functions for this type *)
 type ('a, 'b) interval_composed = {start_pos: 'a coordinate; end_pos: 'a coordinate}
 
 (** Construct a coordinate position of specific type *)
@@ -77,4 +78,16 @@ let overlaps_closed (i: ('a, cl) interval) (j: ('a, cl) interval) : bool =
     let i,j =
         if i >* j then j,i else i,j in
     if i.y < j.x then false else true (* strictly < in closed range *)
+
+(* CONVERSION FUNCTIONS *)
+(* Note the approach of converting ONLY basis OR openness => 4 functions; otherwise would be 12? *)
+(* This perverse nomenclature ;) is AFAICT how OCaml type conversion functions are typically named *)
+
+(** Convert Basis *)
+let ob_interval_of_zb (i: (zb, 'b) interval) : (ob, 'b) interval = {x=i.x+1; y=i.y+1}
+let zb_interval_of_ob (i: (ob, 'b) interval) : (zb, 'b) interval = {x=i.x-1; y=i.y-1}
+
+(** Convert (end) interval openness *)
+let cl_interval_of_ho (i: ('a, ho) interval) : ('a, cl) interval = {x=i.x; y=i.y-1}
+let ho_interval_of_cl (i: ('a, cl) interval) : ('a, ho) interval = {x=i.x; y=i.y+1}
 
