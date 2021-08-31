@@ -4,15 +4,16 @@ Parameterizing generics with a const value is akin to value templates in C++ and
 which is how we implemented Typesafe Coordinates in `dhtslib`.
 
 Implemented:
-    - `Coordinate`
-    - `Interval`
-    - `Interval` constructors for each of the four coordinate systems
-    - Comparison operators
-    - `Interval::len`
+ - `Coordinate`
+ - `Interval`
+ - `Interval` constructors for each of the four coordinate systems
+ - Comparison operators
+ - `Interval::len`
 
 TODO:
-    - Type conversion functions
+ - Type conversion functions
 
 Notes:
-    - Until const generics type specialization is implemented, there is a runtime value check on the enum parameter and associated branching (confirmed via disassembly at godbolt.org)
+ - Until const generics type specialization is implemented, there is a runtime value check on the enum parameter and associated branching (confirmed via disassembly at godbolt.org)
+ - Requires Rust nightly toolchain (`rustup default nightly` or `cargo +nightly test --lib`
 
