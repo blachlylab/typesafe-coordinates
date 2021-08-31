@@ -3,12 +3,6 @@
 \usepackage{graphicx}
 \usepackage{authblk}
 \usepackage[hyphens]{url}   % required to make url's linebreak at -
-\usepackage{hyperref}
-\hypersetup{
-    colorlinks=true,
-    urlcolor=blue,
-    citecolor=magenta,
-}
 
 \usepackage{fontspec}
 %\setmainfont{CrimsonPro}
@@ -32,6 +26,17 @@
     morecomment=[l]{//},
     morecomment=[s]{/*}{*/},
     morestring=[b]",
+}
+
+% Rule of thumb: load `hyperref` last.
+% Why I love *eyeroll* LaTeX: Bizzare interaction of `setspace` and `hyperref`,
+% both of which modify the \footnote command:
+% https://tex.stackexchange.com/questions/188273/using-setspace-package-breaks-footnotes-link
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    urlcolor=blue,
+    citecolor=magenta,
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
