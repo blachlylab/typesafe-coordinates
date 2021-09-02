@@ -10,7 +10,6 @@
 /// Examples:
 /// 
 /// let i : Interval<{Basis::Zero}, {Openness::HalfOpen}> = Interval::from_int(0, 100);
-/// let j : Interval<{Basis
 
 use std::cmp::Ordering;
 
@@ -74,6 +73,8 @@ impl<const B: Basis, const O: Openness> PartialOrd for Interval<B, O> {
     }
 }
 
+// With runtime matching on generic parameterization
+/*
 impl<const B: Basis, const O: Openness> Interval<B, O> {
     fn len(&self) -> u64 {
         // Without const generic specialization (???), this is a runtime test
@@ -81,6 +82,22 @@ impl<const B: Basis, const O: Openness> Interval<B, O> {
             Openness::HalfOpen => self.end - self.start,
             Openness::Closed => self.end - self.start + 1,
         }
+    }
+}
+*/
+
+// Compile time
+impl<const B: Basis> Interval<B, {Openness::HalfOpen}> {
+    #[allow(dead_code)]
+    fn len(&self) -> u64 {
+        self.end - self.start
+    }
+}
+// Compile time
+impl<const B: Basis> Interval<B, {Openness::Closed}> {
+    #[allow(dead_code)]
+    fn len(&self) -> u64 {
+        self.end - self.start + 1
     }
 }
 
