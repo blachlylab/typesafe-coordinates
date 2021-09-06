@@ -10,6 +10,14 @@
 /// Examples:
 /// 
 /// let i : Interval<{Basis::Zero}, {Openness::HalfOpen}> = Interval::from_int(0, 100);
+///
+/// # Conversion
+/// To avoid writing a series of 12 distinct functions (Rust lacks compile time `static if`),
+/// conversions are, as in the OCaml implementation, specialized on only one of Basis or Openness.
+/// Then, we only need 4 conversion functions: `to_onebasis`, `to_zerobasis`, `to_closed`, `to_halfopen`.
+/// Conversion can be done in one step or two, as needed. If we wished, we could write a series of
+/// four functions `to_{completetype}`, and use runtime matching on the type's const enum parameter,
+/// but again this incurs runtime branch cost as Rust does not have D's `static if` construct.
 
 mod tests;
 
@@ -88,18 +96,85 @@ impl<const B: Basis, const O: Openness> Interval<B, O> {
 }
 */
 
-// Compile time
+/// Compile-time zero-basis specializations
+impl<const O: Openness> Interval<{Basis::Zero}, O> {
+    #[allow(dead_code)]
+    fn to_onebasis(&self) -> Interval<{Basis::One}, O> {
+        Interval {
+            start: self.start + 1,
+            end: self.end + 1,
+        }
+    }
+}
+
+/// Compile-time one-basis speicalizations
+impl<const O: Openness> Interval<{Basis::One}, O> {
+    #[allow(dead_code)]
+    fn to_zerobasis(&self) -> Interval<{Basis::Zero}, O> {
+        Interval {
+            start: self.start - 1,
+            end: self.end - 1,
+        }
+    }
+}
+
+/// Compile time half-open specializations
 impl<const B: Basis> Interval<B, {Openness::HalfOpen}> {
     #[allow(dead_code)]
     fn len(&self) -> u64 {
         self.end - self.start
     }
+
+    #[allow(dead_code)]
+    fn overlaps(&self, other: &Self) -> bool {
+        if self.start > other.start {
+            let min = other;
+            let max = self;
+            min.end > max.start
+        } else {
+            let min = self;
+            let max = other;
+            min.end > max.start
+        }
+    }
+
+    /// Convert to a closed interval of same start type
+    #[allow(dead_code)]
+    fn to_closed(&self) -> Interval<B, {Openness::Closed}> {
+        Interval {
+            start: self.start,
+            end: self.end - 1,
+        }
+    }
 }
-// Compile time
+
+/// Compile time closed specializations
 impl<const B: Basis> Interval<B, {Openness::Closed}> {
     #[allow(dead_code)]
     fn len(&self) -> u64 {
         self.end - self.start + 1
+    }
+
+    #[allow(dead_code)]
+    fn overlaps(&self, other: &Self) -> bool {
+        if self.start > other.start {
+            let min = other;
+            let max = self;
+            min.end >= max.start
+        } else {
+            let min = self;
+            let max = other;
+            min.end >= max.start
+        }
+    }
+    
+    /// Convert to a half-open interval of same start type
+    #[allow(dead_code)]
+    fn to_halfopen(&self) -> Interval<B, {Openness::HalfOpen}> {
+        Interval {
+            start: self.start,
+            end: self.end + 1,
+        }
     }
 }
 
@@ -126,21 +201,27 @@ impl<const B: Basis, const O: Openness> Interval<B, O> {
 
 /// Constuct a Zero-based, Half Open Interval
 pub fn ZBHO(start: u64, end: u64) -> Interval<{Basis::Zero}, {Openness::HalfOpen}> {
+    debug_assert!(end > start || start == 0);
     Interval { start, end }
 }
 
 /// Construct a Zero-based, Closed Interval
 pub fn ZBC(start: u64, end: u64) -> Interval<{Basis::Zero}, {Openness::Closed}> {
+    debug_assert!(end > start || start == 0);
     Interval { start, end }
 }
 
 /// Construct a One-based, Half Open Interval
 pub fn OBHO(start: u64, end: u64) -> Interval<{Basis::One}, {Openness::HalfOpen}> {
+    debug_assert!(start > 0);
+    debug_assert!(end >= start);
     Interval { start, end }
 }
 
 /// Construct a One-based, Closed Interval
 pub fn OBC(start: u64, end: u64) -> Interval<{Basis::One}, {Openness::Closed}> {
+    debug_assert!(start > 0);
+    debug_assert!(end >= start);
     Interval { start, end }
 }
 

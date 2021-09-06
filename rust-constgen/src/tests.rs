@@ -71,3 +71,45 @@ fn test_len() {
     assert_eq!(closed.len(), 101);
     assert_ne!(open.len(), 101);
 }
+
+#[test]
+fn test_overlaps() {
+    let a = ZBHO(0, 100);
+    let b = ZBHO(50, 150);
+    let c = ZBHO(100, 200);
+
+    assert!(a.overlaps(&b));
+    assert!(b.overlaps(&c));
+    assert!(!a.overlaps(&c));    // in half open space [0,100) doesn't overlaps [100, 200)
+
+    // check reverse
+    assert!(b.overlaps(&a));
+
+    let d = OBC(1, 100);
+    let e = OBC(51, 150);
+    let f = OBC(100, 200);
+
+    assert!(d.overlaps(&e));
+    assert!(e.overlaps(&f));
+    assert!(d.overlaps(&f)); // in closed space, [1,100] overlaps [100,200]
+
+    // check reverse
+    assert!(e.overlaps(&d));
+}
+
+#[test]
+fn test_conversion() {
+    let x = ZBHO(0, 100);
+    let y = x.to_closed();
+    assert_eq!(y, ZBC(0, 99));
+
+    let z = y.to_halfopen();
+    assert_eq!(z, x);
+
+    let a = OBC(1, 100);
+    let b = x.to_onebasis().to_closed();
+    assert_eq!(a, b);
+
+    let c = a.to_zerobasis().to_halfopen();
+    assert_eq!(c, x);
+}
