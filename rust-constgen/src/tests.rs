@@ -1,12 +1,22 @@
 #[cfg(test)]
-
 use super::*;
 
 #[test]
+fn test_display() {
+    let x = ZBHO(100, 200);
+    let y = ZBC(100, 199);
+    let z = OBHO(100, 200);
+
+    assert_eq!(format!("{}", x), "[100, 200)");
+    assert_eq!(format!("{}", y), "[100, 199]");
+    assert_eq!(format!("{}", x), format!("{}", z));
+}
+
+#[test]
 fn coord_compare() {
-    let x : Coordinate<{Basis::Zero}> = Coordinate{ pos: 0 };
-    let y : Coordinate<{Basis::Zero}> = Coordinate{ pos: 100 };
-    let z : Coordinate<{Basis::Zero}> = Coordinate{ pos: 200 };
+    let x: Coordinate<{ Basis::Zero }> = Coordinate { pos: 0 };
+    let y: Coordinate<{ Basis::Zero }> = Coordinate { pos: 100 };
+    let z: Coordinate<{ Basis::Zero }> = Coordinate { pos: 200 };
 
     assert!(x < y);
     assert!(x <= z);
@@ -15,8 +25,8 @@ fn coord_compare() {
     assert!(z == z);
     assert!(z >= y);
 
-    let a: Coordinate<{Basis::One}> = Coordinate{ pos: 1 };
-    let b: Coordinate<{Basis::One}> = Coordinate{ pos: 100 };
+    let a: Coordinate<{ Basis::One }> = Coordinate { pos: 1 };
+    let b: Coordinate<{ Basis::One }> = Coordinate { pos: 100 };
 
     assert!(a < b);
     assert!(b > a);
@@ -28,10 +38,13 @@ fn coord_compare() {
 
 #[test]
 fn interval_compare() {
-    let i : Interval<{Basis::Zero}, {Openness::HalfOpen}> = Interval{ start: 0, end: 100 };
-    let j : Interval<{Basis::Zero}, {Openness::HalfOpen}> = Interval{ start: 50, end: 150 };
-    let k : Interval<{Basis::Zero}, {Openness::HalfOpen}> = Interval::from_int(100, 200);
-    
+    let i: Interval<{ Basis::Zero }, { Openness::HalfOpen }> = Interval { start: 0, end: 100 };
+    let j: Interval<{ Basis::Zero }, { Openness::HalfOpen }> = Interval {
+        start: 50,
+        end: 150,
+    };
+    let k: Interval<{ Basis::Zero }, { Openness::HalfOpen }> = Interval::from_int(100, 200);
+
     assert_eq!(i, i);
     assert_ne!(i, j);
     assert!(i < j);
@@ -39,8 +52,11 @@ fn interval_compare() {
     assert!(k >= k);
     assert!(k > i);
 
-    let l : Interval<{Basis::Zero}, {Openness::Closed}> = Interval{ start: 100, end: 200};
-    let m : Interval<{Basis::Zero}, {Openness::Closed}> = Interval::from_int(100, 200);
+    let l: Interval<{ Basis::Zero }, { Openness::Closed }> = Interval {
+        start: 100,
+        end: 200,
+    };
+    let m: Interval<{ Basis::Zero }, { Openness::Closed }> = Interval::from_int(100, 200);
     assert_eq!(l, m);
 
     // Won't compile:
@@ -48,10 +64,10 @@ fn interval_compare() {
 
     // Try to trigger compiler bug (warning: associated function is never used: `new`)
     // by proving that it is called for all four combinations of (Basis, Openness)
-    let _w : Interval<{Basis::Zero}, {Openness::HalfOpen}> = Interval::new();
-    let _x : Interval<{Basis::Zero}, {Openness::Closed}> = Interval::new();
-    let _y : Interval<{Basis::One}, {Openness::HalfOpen}> = Interval::new();
-    let _z : Interval<{Basis::One}, {Openness::Closed}> = Interval::new();
+    let _w: Interval<{ Basis::Zero }, { Openness::HalfOpen }> = Interval::new();
+    let _x: Interval<{ Basis::Zero }, { Openness::Closed }> = Interval::new();
+    let _y: Interval<{ Basis::One }, { Openness::HalfOpen }> = Interval::new();
+    let _z: Interval<{ Basis::One }, { Openness::Closed }> = Interval::new();
 }
 
 #[test]
@@ -80,7 +96,7 @@ fn test_overlaps() {
 
     assert!(a.overlaps(&b));
     assert!(b.overlaps(&c));
-    assert!(!a.overlaps(&c));    // in half open space [0,100) doesn't overlaps [100, 200)
+    assert!(!a.overlaps(&c)); // in half open space [0,100) doesn't overlaps [100, 200)
 
     // check reverse
     assert!(b.overlaps(&a));
