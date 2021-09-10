@@ -37,6 +37,25 @@ fn coord_compare() {
 }
 
 #[test]
+fn make_coords() {
+    // Specify basis for ::new, infer for ::from_int
+    let mut a = Coordinate::<{Basis::Zero}>::new();
+    a.pos = 123;
+
+    let b = Coordinate::from_int(123);
+    assert_eq!(b.pos, 123);
+    assert_eq!(a, b);
+
+    // Infer basis for ::new, specify for ::from_int
+    let mut c = Coordinate::new();
+    c.pos = 456;
+
+    let d = Coordinate::<{Basis::One}>::from_int(456);
+    assert_eq!(d.pos, 456);
+    assert_eq!(c, d);
+}
+
+#[test]
 fn interval_compare() {
     let i: Interval<{ Basis::Zero }, { Openness::HalfOpen }> = Interval { start: 0, end: 100 };
     let j: Interval<{ Basis::Zero }, { Openness::HalfOpen }> = Interval {

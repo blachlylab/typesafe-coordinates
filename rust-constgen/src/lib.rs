@@ -18,21 +18,22 @@
 /// Conversion can be done in one step or two, as needed. If we wished, we could write a series of
 /// four functions `to_{completetype}`, and use runtime matching on the type's const enum parameter,
 /// but again this incurs runtime branch cost as Rust does not have D's `static if` construct.
+///
+/// # Notes
+/// The rust nightly compiler as of 1.56 erroneously emits `dead_code` warning for methods on
+/// generic structs parameterized by enums? Alternatively is this on all methods when run
+/// only via testing?
 mod tests;
 
 use std::cmp::Ordering;
 use std::fmt; // `fmt::Display` trait
 
-// Compiler bug: warns `Variant is not constructed` for enum members,
-// when used only at compile time to parameterize a type via const generics
-#[allow(dead_code)]
 #[derive(Eq, PartialEq)]
 pub enum Basis {
     Zero,
     One,
 }
 
-#[allow(dead_code)]
 #[derive(Eq, PartialEq)]
 pub enum Openness {
     HalfOpen,
@@ -51,14 +52,10 @@ impl<const B: Basis> PartialOrd for Coordinate<B> {
 }
 
 impl<const B: Basis> Coordinate<B> {
-    // Compiler warns not used I believe due to const generics.
-    #[allow(dead_code)]
     fn new() -> Self {
         Coordinate { pos: 0 }
     }
 
-    // Compiler warns not used I believe due to const generics.
-    #[allow(dead_code)]
     fn from_int(pos: u64) -> Self {
         Coordinate { pos }
     }
@@ -115,7 +112,6 @@ impl<const B: Basis, const O: Openness> Interval<B, O> {
 
 /// Compile-time zero-basis specializations
 impl<const O: Openness> Interval<{ Basis::Zero }, O> {
-    #[allow(dead_code)]
     fn to_onebasis(&self) -> Interval<{ Basis::One }, O> {
         Interval {
             start: self.start + 1,
@@ -126,7 +122,6 @@ impl<const O: Openness> Interval<{ Basis::Zero }, O> {
 
 /// Compile-time one-basis speicalizations
 impl<const O: Openness> Interval<{ Basis::One }, O> {
-    #[allow(dead_code)]
     fn to_zerobasis(&self) -> Interval<{ Basis::Zero }, O> {
         Interval {
             start: self.start - 1,
@@ -139,12 +134,10 @@ impl<const O: Openness> Interval<{ Basis::One }, O> {
 ///
 /// Overlap detection differs depending on openness of range end
 impl<const B: Basis> Interval<B, { Openness::HalfOpen }> {
-    #[allow(dead_code)]
     fn len(&self) -> u64 {
         self.end - self.start
     }
 
-    #[allow(dead_code)]
     fn overlaps(&self, other: &Self) -> bool {
         if self.start > other.start {
             let min = other;
@@ -158,7 +151,6 @@ impl<const B: Basis> Interval<B, { Openness::HalfOpen }> {
     }
 
     /// Convert to a closed interval of same start type
-    #[allow(dead_code)]
     fn to_closed(&self) -> Interval<B, { Openness::Closed }> {
         Interval {
             start: self.start,
@@ -171,12 +163,10 @@ impl<const B: Basis> Interval<B, { Openness::HalfOpen }> {
 ///
 /// Overlap detection differs depending on openness of range end
 impl<const B: Basis> Interval<B, { Openness::Closed }> {
-    #[allow(dead_code)]
     fn len(&self) -> u64 {
         self.end - self.start + 1
     }
 
-    #[allow(dead_code)]
     fn overlaps(&self, other: &Self) -> bool {
         if self.start > other.start {
             let min = other;
@@ -190,7 +180,6 @@ impl<const B: Basis> Interval<B, { Openness::Closed }> {
     }
 
     /// Convert to a half-open interval of same start type
-    #[allow(dead_code)]
     fn to_halfopen(&self) -> Interval<B, { Openness::HalfOpen }> {
         Interval {
             start: self.start,
@@ -200,15 +189,10 @@ impl<const B: Basis> Interval<B, { Openness::Closed }> {
 }
 
 impl<const B: Basis, const O: Openness> Interval<B, O> {
-    // Compiler warns not used I believe due to const generic? Clearly is used in test.
-    // Is also used in all 4 combinations, so is likely `rustc` bug
-    #[allow(dead_code)]
     fn new() -> Self {
         Interval { start: 0, end: 0 }
     }
 
-    // Compiler warns not used I believe due to const generics.
-    #[allow(dead_code)]
     fn from_int(start: u64, end: u64) -> Self {
         Interval { start, end }
     }
