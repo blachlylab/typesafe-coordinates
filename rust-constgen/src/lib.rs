@@ -1,5 +1,5 @@
 #![allow(incomplete_features)]
-#![feature(const_generics)]
+#![feature(adt_const_params)]
 #![allow(non_snake_case)] // ZBHO, OBC, etc. match dhtslib interface
 
 /// Typesafe Coordinates using Rust (nightly) feature "const generics".

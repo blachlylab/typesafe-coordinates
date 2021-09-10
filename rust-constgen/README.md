@@ -11,9 +11,19 @@ Implemented:
  - `Interval::len`
 
 TODO:
- - Type conversion functions
+ - [x] Type conversion functions
+ - [x] Interval::overlaps
+ - [ ] Additional interval functions (intersect, union)
+ - [ ] macros to wrap Rust-htslib functions?
 
 Notes:
- - Until const generics type specialization is implemented, there is a runtime value check on the enum parameter and associated branching (confirmed via disassembly at godbolt.org)
+ - If matching on the const generic value, there is a runtime value check on the enum parameter and associated branching (confirmed via disassembly at godbolt.org) -- in D this could be checked at compile time.
  - Requires Rust nightly toolchain (`rustup default nightly` or `cargo +nightly test --lib`
+ - (Sept 6, 2021) Rust has recently removed the feature flag and split `const_generics` into two
+   * `adt_const_params` <- this is needed for our impl wherein we parameterize generics on Enum values
+   * `generic_const_exprs`
 
+
+
+References:
+ - https://blog.rust-lang.org/inside-rust/2021/09/06/Splitting-const-generics.html
