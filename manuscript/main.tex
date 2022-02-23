@@ -111,6 +111,7 @@ Instead, consider strongly and statically typed languages with generic and polym
 \begin{verbatim}
     Interval <CoordSystem::zbho> i (0, 100);    // C++
     auto i = Interval!CoordSystem.zbho(0, 100); // D
+    let i = Interval::<ZeroBased, HalfOpen>::from_int(0, 100); // rust
 \end{verbatim}
 
 Functions accessing HTS files and records can then be defined to safely take (and return) only the appropriate coordinate/interval type. Passing the wrong coordinate or interval type to a function would thus result in a compile-time error. Alternatively, shifting the burden from library consumer to producer, functions could be defined polymorphically so as to take coordinates or intervals of any type, as long as they include an initial conversion to the correct type within the function body.
