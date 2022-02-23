@@ -140,7 +140,7 @@ A complete understanding of D’s compile-time features is not necessary to use 
 \begin{verbatim}
     auto i = ZBHO(0, 100);  // [0, 100) (zero-based)
     auto j = OBC(1, 100);   // [1, 100] (one-based)
-    auto k = i.to!CoordSystem.obc;
+    auto k = i.to!OBC;
     assert(k == j);
 \end{verbatim}
 
