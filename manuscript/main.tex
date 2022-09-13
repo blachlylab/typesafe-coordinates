@@ -108,7 +108,7 @@ Logic within the function should check the basis and openness, and, if necessary
 Safety could be improved by defining a set of common functions $T_{system}$ where $ system \in \{zbho, zbc, obho, obc\}$ and the $T$ function transforms coordinates to the indicated destination system. However, it is still incumbent upon each function or block of code making use of coordinates and intervals to call these transform functions, their guaranteed usage is not enforced at any level, and they come with the runtime costs of comparison and branching.
 
 Instead, consider strongly and statically typed languages with generic and polymorphic features. Define a type class \texttt{Interval} of which there are four types, corresponding to ZBHO, ZBC, OBHO, and OBC coordinate systems, and for which there exists a function, \textit{to}, (or conversely, \textit{from}) that maps between constituent types. Note that the types may be freely interconverted, as there exists a bijective mapping between any two coordinate systems (Figure \ref{fig:transitiongraph}). While these types could all be defined individually, one might instead leverage polymorphic features of the type system, especially in systems where a type can be parameterized on a constant value. 
-\filbreak
+
 In C++, D, or similar languages this could be done by templating a single \texttt{Interval} class or struct on some enums defining basis and openness:
 \begin{verbatim}
     // C++
@@ -138,7 +138,7 @@ Values of type \texttt{Coordinate} and \texttt{Interval} can be converted to oth
 
 Type construction using enum-templated structs yields distinct, concrete types representing different coordinate systems. This API allows for compile-time checking of coordinate system compatibility, and allows for conversion of singular coordinates and coordinate pairs (intervals) from one system to another. The system is considered typesafe as functions may accept coordinates of only one particular system with compilation failure if another type is passed. 
 
-To instead create a function \texttt{fun} that accepts input of all coordinate systems, the function must be polymorphic or generic over the coordinate(s) type. Then in use, \texttt{fun} must be instantiated\footnote{In C++, D, Rust the function would undergo monomorphization; in e.g. Haskell or OCaml not} with the desired coordinate system type and thereby be parameterized by a known \texttt{Coordinates} type, so type-safety is still achieved. In D this can be inferred, so the function will be automatically instantiated with the correct type. The coordinate system provides compile-time (via the type system) and run-time checks (bounds) to ensure coordinates are valid for their coordinate system; \textit{i.e.}, a one-based system must not contain 0 as a coordinate while a half-open coordinate system’s end coordinate must be greater than its start coordinate.
+To instead create a function \texttt{fun} that accepts input of all coordinate systems, the function must be polymorphic or generic over the coordinate(s) type. Then in use, \texttt{fun} must be instantiated\footnote{Ideally via monomorphization as in C++, D, or Rust for performance.} with the desired coordinate system type and thereby be parameterized by a known \texttt{Coordinates} type, so type-safety is still achieved. In D this can be inferred, so the function will be automatically instantiated with the correct type. The coordinate system provides compile-time (via the type system) and run-time checks (bounds) to ensure coordinates are valid for their coordinate system; \textit{i.e.}, a one-based system must not contain 0 as a coordinate while a half-open coordinate system’s end coordinate must be greater than its start coordinate.
 
 A complete understanding of D’s compile-time features is not necessary to use the \texttt{dhtslib} Typesafe Coordinate System. To reduce verbosity of type signatures, we provide short type aliases and convenience constructors. For example, to declare integer coordinates as a particular coordinate system, one might declare:
 
@@ -160,7 +160,6 @@ To effectively deal with the problem of different coordinate systems across thes
 
 As a concrete example, consider reading a coordinate range encompassing a gene or exon of interest from a GFF3 gene annotation file. In a typesafe coordinate system-enabled library such as \texttt{dhtslib}, the return value of any GFF3 reader will be of a type encoding its one-based closed (OBC) nature. Suppose then that the software must query a BAM file for alignments falling within the range just queried. In a typesafe coordinate system, the prior result can be passed directly to query function which is generic over the type of input coordinates and at compile time has logic injected to perform any necessary conversion of \textit{basis} and/or \textit{openness}. 
 
-\filbreak
 A pseudocode excerpt is shown below.\\
 
 \begin{lstlisting}[language=D,frame=single,basicstyle=\ttfamily\small]
