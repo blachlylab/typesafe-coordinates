@@ -4,9 +4,10 @@
 \usepackage{authblk}
 \usepackage[hyphens]{url}   % required to make url's linebreak at -
 
-\usepackage{fontspec}
+%\usepackage{fontspec}
 %\setmainfont{CrimsonPro}
-\setmainfont{Inter}
+%\setmainfont{Inter}
+%\usepackage[sfdefault]{inter} %arXiv.org TeX live doesn't have inter.sty
 %\usepackage{ebgaramond-maths}
 %\usepackage[bitstream-charter]{mathdesign}
 %\usepackage{librebaskerville}
@@ -61,7 +62,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-High-throughput sequencing file formats and tools encode coordinate intervals with respect to a reference sequence in at least four distinct, incompatible ways. Integrating data from and moving data between different formats has the potential to introduce subtle off-by-one errors. Here, we introduce the notion of typesafe coordinates: coordinate intervals are not only an integer pair, but members of a type class comprising four types: the Cartesian product of a zero or one basis, and an open or closed interval end. By leveraging the type system of statically and strongly-typed, compiled languages we can provide static guarantees that an entire class of error is eliminated. We provide a reference implementation in D as part of a larger work (dhtslib), and a proofs of concept in Rust, Python, and OCaml. Exploratory implementations are available at \url{https://github.com/blachlylab/typesafe-coordinates}.
+High-throughput sequencing file formats and tools encode coordinate intervals with respect to a reference sequence in at least four distinct, incompatible ways. Integrating data from and moving data between different formats has the potential to introduce subtle off-by-one errors. Here, we introduce the notion of typesafe coordinates: coordinate intervals are not only an integer pair, but members of a type class comprising four types: the Cartesian product of a zero or one basis, and an open or closed interval end. By leveraging the type system of statically and strongly-typed, compiled languages we can provide static guarantees that an entire class of error is eliminated. We provide a reference implementation in D as part of a larger work (dhtslib), and proofs of concept in Rust, OCaml, and Python. Exploratory implementations are available at \url{https://github.com/blachlylab/typesafe-coordinates}.
 \end{abstract}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -75,7 +76,7 @@ While  sequence graphs will play an increasingly important role in the future,\c
 
 The adoption of different systems across different high-throughput sequencing (HTS) file formats may reflect the format's intended consumer, as a way to optimize understanding, programming logic/arithmetic, or optimal computation. For example, many---but not all---text-based formats intended for human consumption use a 1-based system and are closed with respect to intervals, which may feel more natural to the human reader. On the other hand, 0-based systems are most familiar to programmers and are more compatible with default zero-based array indexing in most computer languages. Likewise, while the closed interval $[a,b]$ may read naturally to a human, interval length computations are easier and less prone to error in an open-ended (``half open'') system where the length of an interval $I=[a,b)$ can be computed trivially as $b-a$ without the need for unit adjustment. Figure \ref{fig:filesandapis} summarizes coordinate systems used by common formats.
 
-Unfortunately, the use of alternative systems in different files and application programming interfaces (APIs) which must interoperate sets the stage for subtle off-by-one errors, which are a well-recognized class of problems, but also hard to avoid and sometimes difficult to detect.\cite{CWE193} We propose the use of compilers' type systems to aid bioinformatics software developers and to enforce correctness in a guaranteed way. By applying the principles we describe, the use of a statically typed, compiled programming language for the development of bioinformatics software has the potential to provide these guarantees essentially for free. We provide a reference implementation in D, and a proofs of concept in Rust, Python, and OCaml.
+Unfortunately, the use of alternative systems in different files and application programming interfaces (APIs) which must interoperate sets the stage for subtle off-by-one errors, which are a well-recognized class of problems, but also hard to avoid and sometimes difficult to detect.\cite{CWE193} We propose the use of compilers' type systems to aid bioinformatics software developers and to enforce correctness in a guaranteed way. By applying the principles we describe, the use of a statically typed, compiled programming language for the development of bioinformatics software has the potential to provide these guarantees essentially for free. We provide a reference implementation in D, and proofs of concept in Rust, OCaml, and Python.
 
 
 %% Bioinformatic coordinate systems are usually defined as a one dimensional coordinate plane of whole numbers with coordinates commonly reported as two integer values, sometimes associated with a genomic contig string. They are usually describing a position or range of positions with respect to a genomic sequence. These systems inherently rely on two characteristics, Basis and inclusive or exclusive end coordinate. Basis, which is derived from pointer and array arithmetic, is generally zero-based or one-based, indicating whether the first position in the coordinate system starts is 0 or 1. Zero-based is generally reserved for binary format and one-based is reserved for human-readable text. End coordinate exclusivity applies when dealing with a coordinate pair indicating a range. Open-ended coordinate pairs are exclusive and do not contain the end coordinate, while closed-ended coordinate pairs are inclusive and do contain the end coordinate. Since the first coordinate in the coordinate pair is always closed, we often refer to these as half-open or closed coordinate pairs. We can define singular coordinates as either zero-based, or one-based while we can refer to coordinate pairs as: zero-based half-open, zero-based closed, one-based half-open, or one-based closed. To the best of our knowledge, no existing applications or frameworks provide guide rails or formal verification of coordinate system compatibility. At best, zero values in one-based systems, or past-end-of-contig values in zero-based systems could be detected.
@@ -110,9 +111,12 @@ Instead, consider strongly and statically typed languages with generic and polym
 \filbreak
 In C++, D, or similar languages this could be done by templating a single \texttt{Interval} class or struct on some enums defining basis and openness:
 \begin{verbatim}
-    Interval <CoordSystem::zbho> i (0, 100);    // C++
-    auto i = Interval!CoordSystem.zbho(0, 100); // D
-    let i = Interval::<ZeroBased, HalfOpen>::from_int(0, 100); // rust
+    // C++
+    Interval <CoordSystem::zbho> i (0, 100);
+    // D
+    auto i = Interval!CoordSystem.zbho(0, 100);
+    // Rust
+    let i = Interval::<ZeroBased, HalfOpen>::from_int(0, 100);
 \end{verbatim}
 
 Functions accessing HTS files and records can then be defined to safely take (and return) only the appropriate coordinate/interval type. Passing the wrong coordinate or interval type to a function would thus result in a compile-time error. Alternatively, shifting the burden from library consumer to producer, functions could be defined polymorphically so as to take coordinates or intervals of any type, as long as they include an initial conversion to the correct type within the function body.
@@ -134,7 +138,7 @@ Values of type \texttt{Coordinate} and \texttt{Interval} can be converted to oth
 
 Type construction using enum-templated structs yields distinct, concrete types representing different coordinate systems. This API allows for compile-time checking of coordinate system compatibility, and allows for conversion of singular coordinates and coordinate pairs (intervals) from one system to another. The system is considered typesafe as functions may accept coordinates of only one particular system with compilation failure if another type is passed. 
 
-To instead create a function \texttt{fun} that accepts input of all coordinate systems, the function must be polymorphic or generic over the coordinate(s) type. Then in use, \texttt{fun} must be instantiated\footnote{In templated languages like C++, D, Rust the function would undergo monomorphization; in e.g. Haskell or OCaml not} with the desired coordinate system type and thereby be parameterized by a known \texttt{Coordinates} type, so type-safety is still achieved. In D this can be inferred, so the function will be automatically instantiated with the correct type. The coordinate system provides compile-time (via the type system) and run-time checks (bounds) to ensure coordinates are valid for their coordinate system; \textit{i.e.}, a one-based system must not contain 0 as a coordinate while a half-open coordinate system’s end coordinate must be greater than its start coordinate.
+To instead create a function \texttt{fun} that accepts input of all coordinate systems, the function must be polymorphic or generic over the coordinate(s) type. Then in use, \texttt{fun} must be instantiated\footnote{In C++, D, Rust the function would undergo monomorphization; in e.g. Haskell or OCaml not} with the desired coordinate system type and thereby be parameterized by a known \texttt{Coordinates} type, so type-safety is still achieved. In D this can be inferred, so the function will be automatically instantiated with the correct type. The coordinate system provides compile-time (via the type system) and run-time checks (bounds) to ensure coordinates are valid for their coordinate system; \textit{i.e.}, a one-based system must not contain 0 as a coordinate while a half-open coordinate system’s end coordinate must be greater than its start coordinate.
 
 A complete understanding of D’s compile-time features is not necessary to use the \texttt{dhtslib} Typesafe Coordinate System. To reduce verbosity of type signatures, we provide short type aliases and convenience constructors. For example, to declare integer coordinates as a particular coordinate system, one might declare:
 
@@ -157,12 +161,12 @@ To effectively deal with the problem of different coordinate systems across thes
 As a concrete example, consider reading a coordinate range encompassing a gene or exon of interest from a GFF3 gene annotation file. In a typesafe coordinate system-enabled library such as \texttt{dhtslib}, the return value of any GFF3 reader will be of a type encoding its one-based closed (OBC) nature. Suppose then that the software must query a BAM file for alignments falling within the range just queried. In a typesafe coordinate system, the prior result can be passed directly to query function which is generic over the type of input coordinates and at compile time has logic injected to perform any necessary conversion of \textit{basis} and/or \textit{openness}. 
 
 \filbreak
-A pseudocode\footnote{Currently we don't have a good gene-based query method in the GFF3 module, but we should! and, the current iteration of Interval does not encode contig name/id, but we could potentially add this via an \texttt{Optional!} field} excerpt is shown below.\\
+A pseudocode excerpt is shown below.\\
 
 \begin{lstlisting}[language=D,frame=single,basicstyle=\ttfamily\small]
 // GFF3 files' coordinates are one-based closed
-auto regionOfInterest = gff3file.genebounds("TP53");
 // regionOfInterest is type Interval!CoordSystem.obc
+auto regionOfInterest = gff3file.genebounds("TP53");
 
 // BAM files are zero-based, half-open
 // BUT: regionOfInterest from GFF3 can be passed directly
@@ -179,19 +183,19 @@ Finally, we implemented trivial ``typed" coordinates in Python, an extremely pop
 
 \section*{Discussion}   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Both software engineering and bioinformatics are relatively newer disciplines among the applied sciences. In the same way that other engineering fields may apply and benefit from fundamental advances in mathematics and physics, the integrity, safety, and performance of software systems can be improved by applying lessons from computer science. These principles have also made their way to bioinformatics and computational biology, where authors have recognized the Rust language (\url{https://www.rust-lang.org}) for its memory safety attributes and its potential contributions to safer and more correct bioinformatics tools.\cite{koster_rust-bio_2016,perkel_why_2020}  Here, we demonstrate that leveraging the type system and compile-time guarantees of strongly typed languages like D, Rust, and others can reduce the error surface of software in the computational biology and bioinformatics space. These principles could also be extended to more loosely typed language such as Python, albeit with much weaker guarantees and a runtime overhead.
+Software engineering and bioinformatics are relatively newer disciplines among the applied sciences. In the same way that other engineering fields may apply and benefit from fundamental advances in mathematics and physics, the integrity, safety, and performance of software systems can be improved by applying lessons from computer science. These principles have also made their way to bioinformatics and computational biology, where authors have recognized the Rust language (\url{https://www.rust-lang.org}) for its memory safety attributes and its potential contributions to safer and more correct bioinformatics tools.\cite{koster_rust-bio_2016,perkel_why_2020}  Here, we demonstrate that leveraging the type system and compile-time guarantees of strongly typed languages like D, Rust, and others can reduce the error surface of software in the computational biology and bioinformatics space. These principles could also be extended to more loosely typed language such as Python, albeit with much weaker guarantees and a runtime overhead.
 
-The reference implementation of Typesafe Coordinates as part of \textit{dhtslib}\cite{gregory_dhtslib_nodate} --- to our knowledge the first such polymorphic implementation of this concept in any bioinformatics tooling --- is written in D (\url{https://dlang.org/}), a statically-typed, compiled language. We found D's compile-time introspection and metaprogramming features ideal for construction of such a system. We also implemented Typesafe Coordinates in other languages, including Rust, Python, and OCaml, albeit with language-specific limitations in each of these.
+The reference implementation of Typesafe Coordinates as part of \textit{dhtslib}\cite{gregory_dhtslib_nodate} --- to our knowledge the first such polymorphic implementation of this concept in any bioinformatics tooling --- is written in D (\url{https://dlang.org/}), a statically-typed, compiled language. We found D's compile-time introspection and metaprogramming features ideal for construction of such a system. We also implemented Typesafe Coordinates in other languages, including Rust, OCaml, and Python, albeit with language-specific limitations in each of these.
 
 In the thrall of safety, \textit{dhtslib} does not permit circumvention of the system by accepting integer coordinates directly in functions that operate on files or records. This ensures that a software developer cannot create a situation involving off-by-one errors without specific and significant effort. Importantly, this safety is statically guaranteed and therefore comes without any runtime branching penalty. In the case that coordinates must be hardcoded or accepted as untrusted user input, type constructors accept integers, and the explicit initialization of a named type carries distinct advantages. First, it forces the developer in these cases to be sure about the coordinate system (depending on the data’s downstream use). Second, it is implicitly self-documenting. Finally, correctness (or lack thereof) of the coordinates is deterministically transmitted through the call chain and program flow, simplifying debugging.
 
-In conclusion, we have introduced the concept of Typesafe Coordinate Systems for bioinformatics and computational biology, and provided a reference implementation as part of a larger and more comprehensive high-throughput sequencing package \texttt{dhtslib}. We have also provided additional proofs-of-concept in various languages including Rust, an emerging language for bioinformatics. We hope that these safety concepts will be adopted by others and implemented either as standalone packages (leveraging macros and metaprogramming), or directly integrated into popular libraries and packages such as SeqAn,\cite{reinert_seqan_2017} BioPython,\cite{cock_biopython_2009}, Rust-Bio,\cite{koster_rust-bio_2016} and hts-nim.\cite{pedersen_hts-nim_2018} Using languages' type systems to eliminate error in specific problem domains is a powerful safety concept and should become routine in bioinformatics.
+In conclusion, we have introduced the concept of Typesafe Coordinate Systems for bioinformatics and computational biology, and provided a reference implementation as part of a larger and more comprehensive high-throughput sequencing package \texttt{dhtslib}. We have also provided additional proofs-of-concept in various languages including Rust, an emerging language for bioinformatics. We hope that these safety concepts will be adopted by others and implemented either as standalone packages (leveraging macros and metaprogramming), or directly integrated into popular libraries and packages such as SeqAn,\cite{reinert_seqan_2017} BioPython,\cite{cock_biopython_2009}, Rust-Bio,\cite{koster_rust-bio_2016} and hts-nim.\cite{pedersen_hts-nim_2018} Using type systems to eliminate error in specific problem domains is a powerful safety concept and should become routine in bioinformatics.
 
 
 
 \section*{Acknowledgements} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The authors wish to thank Nicholas Wilson for critically reading the draft manuscript.
+The authors wish to thank Brent Pedersen and Nicholas Wilson for critically reading the draft manuscript, and Seb Mondet for reviewing the OCaml code.
 
 \newpage
 \printbibliography
