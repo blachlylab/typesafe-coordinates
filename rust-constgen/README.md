@@ -3,20 +3,26 @@ Typesafe Coordinates implemented using the Rust (nightly unstable) feature "Cons
 Parameterizing generics with a const value is akin to value templates in C++ and D,
 which is how we implemented Typesafe Coordinates in `dhtslib`.
 
-Implemented:
+As of mid-2022, a nightly Rust compiler is still needed:
+
+`cargo +nightly test`
+
+Compiler tracking issue here: https://github.com/rust-lang/rust/issues/95174
+
+**Implemented:**
  - `Coordinate`
  - `Interval`
  - `Interval` constructors for each of the four coordinate systems
  - Comparison operators
  - `Interval::len`
 
-TODO:
+**TODO:**
  - [x] Type conversion functions
  - [x] Interval::overlaps
  - [ ] Additional interval functions (intersect, union)
  - [ ] macros to wrap Rust-htslib functions?
 
-Notes:
+**Notes:**
  - If matching on the const generic value, there is a runtime value check on the enum parameter and associated branching (confirmed via disassembly at godbolt.org) -- in D this could be checked at compile time.
  - Requires Rust nightly toolchain (`rustup default nightly` or `cargo +nightly test --lib`
  - (Sept 6, 2021) Rust has recently removed the feature flag and split `const_generics` into two
